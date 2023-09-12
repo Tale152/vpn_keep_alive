@@ -63,6 +63,7 @@ public class ExecutorServiceApplicationController implements ApplicationControll
             try {
                 Response response = client.newCall(request).execute();
                 onRequestResponseStrategy.performStrategy(RequestResponse.builder().code(response.code()).build());
+                response.body().close(); // could launch an error if not done
             } catch (final IOException e) {
                 onRequestErrorStrategy.performStrategy(e);
             }
