@@ -5,7 +5,9 @@ on:
       - "v*.*.*"
 
 jobs:
-  CD:
+
+  publish_release:
+    name: Publish release
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -23,15 +25,6 @@ jobs:
     - name: Execute Gradle build
       run: ./gradlew build
 
-    - name: Login to DockerHub Registry
-      run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-
-    - name: Build the latest Docker image
-      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKERHUB_USERNAME }}/vpn_keep_alive:latest
-
-    - name: Push the latest Docker image
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/vpn_keep_alive:latest
-
     - name: Rename file
       run: mv ./app/build/libs/vpn_keep_alive.jar ./app/build/libs/vpn_keep_alive_${{ github.ref_name }}.jar
 
@@ -39,3 +32,16 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: ./app/build/libs/vpn_keep_alive_${{ github.ref_name }}.jar
+
+  publish_docker_image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to DockerHub Registry
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Build the latest Docker image
+        run: docker build . --file Dockerfile --tag ${{ secrets.DOCKERHUB_USERNAME }}/vpn_keep_alive:${{ github.ref_name }}
+
+      - name: Push the latest Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/vpn_keep_alive:${{ github.ref_name }}
