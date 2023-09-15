@@ -8,6 +8,7 @@ jobs:
 
   publish_release:
     name: Publish release
+    if: endsWith(github.ref, 'master') == true
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -34,6 +35,8 @@ jobs:
         files: ./app/build/libs/vpn_keep_alive_${{ github.ref_name }}.jar
 
   publish_docker_image:
+    name: Publish Docker image
+    if: endsWith(github.ref, 'master') == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
